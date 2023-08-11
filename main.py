@@ -2,9 +2,17 @@ from ultralytics import YOLO
 import numpy
 import cv2
 import math
+import serial
 
-model_path = 'pose1.pt'
+model_path = r"C:\Users\Ashling Mccarthy\Programming\gait analysis\Stride\pose1.pt"
 model = YOLO(model_path)
+
+# Replace 'COMX' with the actual serial port of your Arduino Nano
+SERIAL_PORT = 'COM4'
+BAUD_RATE = 9600
+buttonPressed = 1 #when button pressed in website make this 1, else 0
+pronationAngle = "30" #whatever angle the thing calculated
+
 def calc_angle(list_of_points):
     angles = []
     for index in range(0, 8, 4):
@@ -35,20 +43,28 @@ def calculate_points(image_path):
                 list_of_points.append((x, y))
                 cv2.putText(img, str('.'), (x, y),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
-
+    #cv2.imshow('img', img)
+    #cv2.waitKey(0)
     return list_of_points
 
+def send_packet(data):
+    with serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1) as ser:
+        ser.write(data.encode())
+        response = ser.readline().decode().strip()
+        print("Arduino response:", response)
+
 if __name__ == "__main__":
-    list_of_points = (calculate_points('feet.jpg'))
+    list_of_points = (calculate_points("ashlingfeet.jpeg"))
     left_foot, right_foot = calc_angle(list_of_points)
     print('left foot angle:', round(left_foot, 2))
     print('right foot angle: ', round(right_foot, 2))
-
-
-
-
-
-
+    
+    while True:
+        user_input = input("press enter to recieive infor, press 'exit' to quit): ")
+        if user_input.lower() == 'exit':
+            break
+        elif buttonPressed == 1:
+            send_packet(pronationAngle)
+        else:
+            print("Invalid input. Please enter '0' or '1'.")
+        
