@@ -10,7 +10,7 @@ model = YOLO(model_path)
 # Replace 'COMX' with the actual serial port of your Arduino Nano
 SERIAL_PORT = 'COM4'
 BAUD_RATE = 9600
-buttonPressed = 1 #when button pressed in website make this 1, else 0
+buttonPressed = 1 #when button is -1, the button doesn't work
 pronationAngle = "30" #whatever angle the thing calculated
 
 def calc_angle(list_of_points):
@@ -60,11 +60,11 @@ if __name__ == "__main__":
     print('right foot angle: ', round(right_foot, 2))
     
     while True:
-        user_input = input("press enter to recieive infor, press 'exit' to quit): ")
+        user_input = input("press enter to recieive info, press 'exit' to quit): ")
         if user_input.lower() == 'exit':
             break
         elif buttonPressed == 1:
-            send_packet(pronationAngle)
+            send_packet(str(left_foot))
         else:
             print("Invalid input. Please enter '0' or '1'.")
         
